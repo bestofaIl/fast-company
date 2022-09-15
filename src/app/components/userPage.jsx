@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api/index";
 import PropTypes from "prop-types";
 import QualitiesList from "./qualitiesList";
@@ -9,9 +9,12 @@ const UserPage = ({ history, userId }) => {
     const handlePushBack = () => {
         history.push("/users");
     };
-    api.users.getById(userId).then(data => {
-        setUser(data);
+    useEffect(() => {
+        api.users.getById(userId).then(data => {
+            setUser(data);
+        });
     });
+
     if (user) {
         return (
             <>
@@ -30,7 +33,8 @@ const UserPage = ({ history, userId }) => {
 
 UserPage.propTypes = {
     match: PropTypes.object,
-    history: PropTypes.object
+    history: PropTypes.object,
+    userId: PropTypes.string
 };
 
 export default UserPage;
