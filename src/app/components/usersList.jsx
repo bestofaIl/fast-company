@@ -5,6 +5,7 @@ import GroupList from "./groupList";
 import api from "../api";
 import SearchStat from "./searchStat";
 import UsersTable from "./usersTable";
+import SearchLine from "./searchLine";
 import _ from "lodash";
 
 const UsersList = () => {
@@ -13,8 +14,10 @@ const UsersList = () => {
     const [professions, setProfessions] = useState();
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ iter: "name", order: "asc" });
+    const [value, setValue] = useState("");
 
     const [users, setUsers] = useState();
+    const searchRegEx = new RegExp(value, "i");
 
     useEffect(() => {
         api.users.fetchAll().then((data) => setUsers(data));
@@ -24,6 +27,7 @@ const UsersList = () => {
         const updatedUsers = users.filter((user) => user._id !== userId);
         setUsers(updatedUsers);
     };
+
     const handleToggleBookMark = (id) => {
         setUsers(
             users.map((user) => {
@@ -35,6 +39,11 @@ const UsersList = () => {
         );
     };
 
+    const handleChange = (e) => {
+        setValue(e.target.value);
+        setSelectedProf();
+    };
+
     useEffect(() => {
         api.professions.fetchAll().then((data) => setProfessions(data));
     }, []);
@@ -44,6 +53,7 @@ const UsersList = () => {
 
     const handleProfessionSelect = (item) => {
         setSelectedProf(item);
+        setValue("");
     };
 
     const handlePageChange = (pageIndex) => {
@@ -54,12 +64,13 @@ const UsersList = () => {
     };
 
     if (users) {
+        const searchUsers = value ? users.filter(user => searchRegEx.test(user.name)) : users;
         const filteredUsers = selectedProf
             ? users.filter(
                 user =>
                     JSON.stringify(user.profession) ===
                     JSON.stringify(selectedProf))
-            : users;
+            : searchUsers;
 
         const count = filteredUsers.length;
         const sortedUsers = _.orderBy(filteredUsers, [sortBy.iter], [sortBy.order]);
@@ -69,42 +80,45 @@ const UsersList = () => {
         };
 
         return (
-            <div className="d-flex">
-                {professions && (
-                    <div className="d-flex flex-column flex-shrink-0 p-3">
-                        <GroupList
-                            selectedItem={selectedProf}
-                            items={professions}
-                            onItemSelect={handleProfessionSelect}
-                        />
-                        <button
-                            className="btn btn-secondary mt-2"
-                            onClick={clearFilter}
-                        >
-                            Очистить
-                        </button>
-                    </div>
-                )}
-                <div className="d-flex flex-column">
-                    <SearchStat length={count}/>
-                    {count > 0 && (
-                        <UsersTable
-                            users={userCrop}
-                            onSort={handleSort}
-                            selectedSort={sortBy}
-                            onDelete={handleDelete}
-                            onToggleBookMark={handleToggleBookMark}/>
+            <>
+                <div className="d-flex">
+                    {professions && (
+                        <div className="d-flex flex-column flex-shrink-0 p-3">
+                            <GroupList
+                                selectedItem={selectedProf}
+                                items={professions}
+                                onItemSelect={handleProfessionSelect}
+                            />
+                            <button
+                                className="btn btn-secondary mt-2"
+                                onClick={clearFilter}
+                            >
+                                Очистить
+                            </button>
+                        </div>
                     )}
-                    <div className="div d-flex justify-content-center">
-                        <Pagination
-                            itemsCount={count}
-                            pageSize={pageSize}
-                            currentPage={currentPage}
-                            onPageChange={handlePageChange}
-                        />
+                    <div className="d-flex flex-column">
+                        <SearchStat length={count}/>
+                        <SearchLine onChange={handleChange} value={value} />
+                        {count > 0 && (
+                            <UsersTable
+                                users={userCrop}
+                                onSort={handleSort}
+                                selectedSort={sortBy}
+                                onDelete={handleDelete}
+                                onToggleBookMark={handleToggleBookMark}/>
+                        )}
+                        <div className="div d-flex justify-content-center">
+                            <Pagination
+                                itemsCount={count}
+                                pageSize={pageSize}
+                                currentPage={currentPage}
+                                onPageChange={handlePageChange}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
+            </>
         );
     }
     return "loading...";
