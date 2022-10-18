@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from "react";
-import Pagination from "./pagination";
-import { paginate } from "../utils/paginate";
-import GroupList from "./groupList";
-import api from "../api";
-import SearchStat from "./searchStat";
-import UsersTable from "./usersTable";
-import SearchLine from "./searchLine";
+import Pagination from "../../common/pagination";
+import { paginate } from "../../../utils/paginate";
+import GroupList from "../../common/groupList";
+import api from "../../../api";
+import SearchStat from "../../ui/searchStat";
+import UsersTable from "../../ui/usersTable";
+import SearchLine from "../../common/searchLine";
 import _ from "lodash";
 
-const UsersList = () => {
+const UsersListPage = () => {
     const pageSize = 8;
     const [currentPage, setCurrentPage] = useState(1);
     const [professions, setProfessions] = useState();
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ iter: "name", order: "asc" });
-    const [value, setValue] = useState("");
 
     const [users, setUsers] = useState();
-    const searchRegEx = new RegExp(value, "i");
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const searchRegEx = new RegExp(searchQuery, "i");
 
     useEffect(() => {
         api.users.fetchAll().then((data) => setUsers(data));
@@ -39,8 +40,8 @@ const UsersList = () => {
         );
     };
 
-    const handleChange = (e) => {
-        setValue(e.target.value);
+    const handleSearchQuery = ({ target }) => {
+        setSearchQuery(target.value);
         setSelectedProf();
     };
 
@@ -49,11 +50,11 @@ const UsersList = () => {
     }, []);
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedProf]);
+    }, [selectedProf, searchQuery]);
 
     const handleProfessionSelect = (item) => {
         setSelectedProf(item);
-        setValue("");
+        setSearchQuery("");
     };
 
     const handlePageChange = (pageIndex) => {
@@ -64,7 +65,7 @@ const UsersList = () => {
     };
 
     if (users) {
-        const searchUsers = value ? users.filter(user => searchRegEx.test(user.name)) : users;
+        const searchUsers = searchQuery ? users.filter(user => searchRegEx.test(user.name)) : users;
         const filteredUsers = selectedProf
             ? users.filter(
                 user =>
@@ -99,7 +100,7 @@ const UsersList = () => {
                     )}
                     <div className="d-flex flex-column">
                         <SearchStat length={count}/>
-                        <SearchLine onChange={handleChange} value={value} />
+                        <SearchLine onChange={handleSearchQuery} value={searchQuery} />
                         {count > 0 && (
                             <UsersTable
                                 users={userCrop}
@@ -124,4 +125,4 @@ const UsersList = () => {
     return "loading...";
 };
 
-export default UsersList;
+export default UsersListPage;

@@ -1,14 +1,19 @@
 import React from "react";
 import { useParams, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import UsersList from "../components/usersList";
-import UserPage from "../components/userPage";
+import UsersListPage from "../components/page/usersListPage";
+import UserPage from "../components/page/userPage";
+import EditUser from "../components/page/editUser";
 
 const Users = () => {
     const history = useHistory();
     const params = useParams();
-    const { userId } = params;
-    return <>{userId ? <UserPage userId={userId} history={history} /> : <UsersList />}</>;
+    const { userId, edit } = params;
+
+    if (userId && edit) {
+        return <EditUser userId={userId} history={history} />;
+    }
+    return <>{userId ? <UserPage userId={userId} history={history} /> : <UsersListPage />}</>;
 };
 
 Users.propTypes = {

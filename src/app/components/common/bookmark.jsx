@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const Bookmark = ({ status, ...rest }) => {
+const Bookmark = ({ status, onClick }) => {
     const pic = status ? (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -26,11 +26,12 @@ const Bookmark = ({ status, ...rest }) => {
         </svg>
     );
 
-    return <button {...rest}>{pic}</button>;
+    return <button onClick={onClick}>{pic}</button>;
 };
 
 Bookmark.propTypes = {
-    status: PropTypes.bool
+    status: PropTypes.bool,
+    onClick: PropTypes.func
 };
 
 export default Bookmark;
