@@ -6,14 +6,18 @@ import UserPage from "../components/page/userPage";
 import EditUser from "../components/page/editUser";
 
 const Users = () => {
-    const history = useHistory();
     const params = useParams();
     const { userId, edit } = params;
 
-    if (userId && edit) {
-        return <EditUser userId={userId} history={history} />;
-    }
-    return <>{userId ? <UserPage userId={userId} history={history} /> : <UsersListPage />}</>;
+    return (
+        <>
+            {userId
+                ? edit
+                    ? <EditUser />
+                    : <UserPage userId={userId}/>
+                : <UsersListPage />}
+        </>
+    );
 };
 
 Users.propTypes = {

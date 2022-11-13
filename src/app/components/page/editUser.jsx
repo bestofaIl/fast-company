@@ -5,8 +5,13 @@ import PropTypes from "prop-types";
 import SelectField from "../common/form/selectField";
 import RadioField from "../common/form/radioField";
 import MultiSelectField from "../common/form/multiSelectField";
+import { useHistory, useParams } from "react-router-dom";
 
-const EditUser = ({ userId, history }) => {
+const EditUser = () => {
+    const params = useParams();
+    const { userId } = params;
+    const history = useHistory();
+
     const [user, setUser] = useState();
     const [data, setData] = useState();
     const [professions, setProfessions] = useState();
@@ -103,8 +108,13 @@ const EditUser = ({ userId, history }) => {
         history.replace(`/users/${userId}`);
     };
 
+    const handleBack = () => {
+        history.push(`/users/${userId}`);
+    };
+
     return (
         <div className="container mt-5">
+            <button className="btn btn-primary" onClick={handleBack}>Назад</button>
             <div className="row">
                 <div className="col-md-6 offset-md-3 shadow p-4">
                     {professions ? (
