@@ -6,8 +6,9 @@ import SelectField from "../common/form/selectField";
 import RadioField from "../common/form/radioField";
 import MultiSelectField from "../common/form/multiSelectField";
 import { useHistory, useParams } from "react-router-dom";
+import BackButton from "../common/backButton";
 
-const EditUser = () => {
+const EditUserPage = () => {
     const params = useParams();
     const { userId } = params;
     const history = useHistory();
@@ -108,13 +109,9 @@ const EditUser = () => {
         history.replace(`/users/${userId}`);
     };
 
-    const handleBack = () => {
-        history.push(`/users/${userId}`);
-    };
-
     return (
         <div className="container mt-5">
-            <button className="btn btn-primary" onClick={handleBack}>Назад</button>
+            <BackButton />
             <div className="row">
                 <div className="col-md-6 offset-md-3 shadow p-4">
                     {professions ? (
@@ -169,9 +166,9 @@ const EditUser = () => {
     );
 };
 
-EditUser.propTypes = {
+EditUserPage.propTypes = {
     history: PropTypes.object,
     userId: PropTypes.string
 };
 
-export default EditUser;
+export default EditUserPage;
