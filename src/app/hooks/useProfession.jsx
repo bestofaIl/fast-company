@@ -13,15 +13,22 @@ const ProfessionProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [professions, setProfessions] = useState([]);
     const [error, setError] = useState(null);
+
     useEffect(() => {
         if (error !== null) {
             toast(error);
             setError(null);
         }
-    }, [error]);
+    }, []);
 
-    useEffect(() => {
-        getProfessionsList();
+    useEffect(async () => {
+        try {
+            const { content } = await professionService.get();
+            setProfessions(content);
+            setIsLoading(false);
+        } catch (e) {
+            errorCatcher(e);
+        }
     }, []);
 
     function errorCatcher(error) {
@@ -31,16 +38,6 @@ const ProfessionProvider = ({ children }) => {
 
     function getProfession(id) {
         return professions.find(profession => profession._id === id);
-    }
-
-    async function getProfessionsList() {
-        try {
-            const { content } = await professionService.get();
-            setProfessions(content);
-            setIsLoading(false);
-        } catch (e) {
-            errorCatcher(e);
-        }
     }
 
     return (
