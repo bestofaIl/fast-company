@@ -3,9 +3,12 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import userService from "../services/user.service";
 import { toast } from "react-toastify";
-import { setTokens } from "../services/localStorage.service";
+import localStorageService, {
+    setTokens
+} from "../services/localStorage.service";
+import { useHistory } from "react-router-dom";
 
-const httpAuth = axios.create({
+export const httpAuth = axios.create({
     baseURL: "https://identitytoolkit.googleapis.com/v1/",
     params: {
         key: process.env.REACT_APP_FIREBASE_KEY
@@ -18,20 +21,23 @@ export const useAuth = () => {
 };
 
 const AuthProvider = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState({});
+    const [currentUser, setCurrentUser] = useState(null);
     const [error, setError] = useState();
+    const [isLoading, setLoading] = useState(true);
+    const history = useHistory();
 
     async function signIn({ email, password }) {
         try {
-            console.log(email, password);
-            const { data } = await httpAuth.post(`accounts:signInWithPassword`, {
-                email,
-                password,
-                returnSecureToken: true
-            });
-            console.log(data);
+            const { data } = await httpAuth.post(
+                `accounts:signInWithPassword`,
+                {
+                    email,
+                    password,
+                    returnSecureToken: true
+                }
+            );
             setTokens(data);
-            console.log(data);
+            await getUserData();
         } catch (e) {
             errorCatcher(e);
             const { code, message } = e.response.data.error;
@@ -39,12 +45,26 @@ const AuthProvider = ({ children }) => {
             if (code === 400) {
                 switch (message) {
                     case "TOO_MANY_ATTEMPTS_TRY_LATER : Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.":
-                        throw new Error("Слишком много попыток входа. Попробуйте позже!");
+                        throw new Error(
+                            "Слишком много попыток входа. Попробуйте позже!"
+                        );
                     default:
-                        throw new Error("Логин или пароль введены некорректно!");
+                        throw new Error(
+                            "Логин или пароль введены некорректно!"
+                        );
                 }
             }
         }
+    }
+
+    function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    function logOut() {
+        localStorageService.removeAuthData();
+        setCurrentUser(null);
+        history.replace("/");
     }
 
     async function signUp({ email, password, ...rest }) {
@@ -55,7 +75,18 @@ const AuthProvider = ({ children }) => {
                 returnSecureToken: true
             });
             setTokens(data);
-            await createUser({ _id: data.localId, email, ...rest });
+            await createUser({
+                _id: data.localId,
+                email,
+                rate: randomInt(1, 5),
+                completedMeetings: randomInt(0, 200),
+                image: `https://avatars.dicebear.com/api/avataaars/${(
+                    Math.random() + 1
+                )
+                    .toString(36)
+                    .substring(7)}.svg`,
+                ...rest
+            });
         } catch (e) {
             errorCatcher(e);
             const { code, message } = e.response.data.error;
@@ -72,7 +103,8 @@ const AuthProvider = ({ children }) => {
 
     async function createUser(data) {
         try {
-            const { content } = userService.create(data);
+            const { content } = await userService.create(data);
+            console.log(content);
             setCurrentUser(content);
         } catch (e) {
             errorCatcher(e);
@@ -86,14 +118,44 @@ const AuthProvider = ({ children }) => {
         }
     }, [error]);
 
+    async function getUserData() {
+        try {
+            const { content } = await userService.getCurrentUser();
+            setCurrentUser(content);
+        } catch (e) {
+            errorCatcher(e);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(async () => {
+        if (localStorageService.getAccessToken()) {
+            getUserData();
+        } else {
+            setLoading(false);
+        }
+    }, []);
+
     function errorCatcher(e) {
         const { message } = e.response.data;
         setError(message);
     }
 
+    async function updateUserData(id, payload) {
+        try {
+            const { content } = await userService.update(id, payload);
+            setCurrentUser(content);
+        } catch (e) {
+            errorCatcher(e);
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ signUp, signIn, currentUser }}>
-            {children}
+        <AuthContext.Provider
+            value={{ signUp, signIn, currentUser, logOut, updateUserData }}
+        >
+            {!isLoading ? children : "Loading"}
         </AuthContext.Provider>
     );
 };

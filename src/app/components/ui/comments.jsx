@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { AddCommentForm } from "../common/comments";
 import CommentsList from "../common/comments/commentsList";
-import api from "../../api";
-import { useParams } from "react-router-dom";
+import { useComments } from "../../hooks/useComments";
 
 function sortByDate(arr) {
     if (!arr) return 0;
@@ -19,31 +18,21 @@ function sortByDate(arr) {
 }
 
 const Comments = () => {
-    const { userId } = useParams();
-    const [comments, setComments] = useState();
-    useEffect(() => {
-        api.comments
-            .fetchCommentsForUser(userId)
-            .then((data) => {
-                setComments(data);
-            });
-    }, []);
+    const { createComment, comments, deleteComment } = useComments();
 
     const handleRemoveComment = (id) => {
-        api.comments.remove(id)
-            .then((id) => {
-                setComments(comments.filter(comment => comment._id !== id));
-            });
+        deleteComment(id);
     };
 
     const handleSubmit = (data) => {
-        api.comments.add({
-            ...data,
-            pageId: userId
-        })
-            .then((data) => {
-                setComments([...comments, data]);
-            });
+        createComment(data);
+        // api.comments.add({
+        //     ...data,
+        //     pageId: userId
+        // })
+        //     .then((data) => {
+        //         setComments([...comments, data]);
+        //     });
     };
 
     const sortedComments = sortByDate(comments);

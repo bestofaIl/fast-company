@@ -1,29 +1,11 @@
 import React, { useEffect, useState } from "react";
-import SelectField from "../form/selectField";
-import api from "../../../api";
 import TextArea from "../form/textArea";
 import { validator } from "../../../utils/validator";
 import PropTypes from "prop-types";
 
 const AddCommentForm = ({ onSubmit }) => {
-    const [users, setUsers] = useState();
     const [errors, setErrors] = useState({});
-    const [data, setData] = useState({
-        userId: "",
-        content: ""
-    });
-
-    useEffect(() => {
-        api.users.fetchAll().then((data) => {
-            const usersList = data.map((user) => {
-                return {
-                    value: user._id,
-                    label: user.name
-                };
-            });
-            setUsers(usersList);
-        });
-    }, []);
+    const [data, setData] = useState({});
 
     const handleChange = (target) => {
         setData((prevState) => ({
@@ -33,11 +15,6 @@ const AddCommentForm = ({ onSubmit }) => {
     };
 
     const validatorConfig = {
-        userId: {
-            isRequired: {
-                message: "Choose user"
-            }
-        },
         content: {
             isRequired: {
                 message: "Description is required to fill"
@@ -60,27 +37,15 @@ const AddCommentForm = ({ onSubmit }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit(data);
-        setData({
-            userId: "",
-            content: ""
-        });
+        setData({});
     };
 
     return (
         <form onSubmit={handleSubmit}>
             <div>
-                <SelectField
-                    label="hello"
-                    defaultOption="Выберите пользователя"
-                    value={data.userId}
-                    onChange={handleChange}
-                    name="userId"
-                    options={users}
-                    error={errors.userId}
-                />
                 <TextArea
                     onChange={handleChange}
-                    value={data.content}
+                    value={data.content || ""}
                     name="content"
                     label="Сообщение"
                     error={errors.content}

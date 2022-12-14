@@ -17,6 +17,7 @@ const RegisterForm = () => {
         password: "",
         profession: "",
         sex: "male",
+        name: "",
         qualities: [],
         licence: false
     });
@@ -98,6 +99,15 @@ const RegisterForm = () => {
             isRequired: {
                 message: "Need to accept licence"
             }
+        },
+        name: {
+            isRequired: {
+                message: "Name is required to fill"
+            },
+            min: {
+                message: "Password must contain at least 3 symbols",
+                value: 3
+            }
         }
     };
     useEffect(() => {
@@ -133,6 +143,13 @@ const RegisterForm = () => {
                 value={data.email}
                 onChange={handleChange}
                 error={errors.email}
+            />
+            <TextField
+                label="Имя"
+                name="name"
+                value={data.name}
+                onChange={handleChange}
+                error={errors.name}
             />
             <TextField
                 label="Password"

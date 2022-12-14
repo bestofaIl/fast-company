@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const Avatar = ({ src, width, height }) => {
     return (
@@ -10,6 +11,12 @@ const Avatar = ({ src, width, height }) => {
             alt="avatar"
         />
     );
+};
+
+Avatar.propTypes = {
+    src: PropTypes.string,
+    width: PropTypes.string,
+    height: PropTypes.string
 };
 
 export default Avatar;
