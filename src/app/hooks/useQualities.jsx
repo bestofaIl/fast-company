@@ -16,7 +16,7 @@ const QualityProvider = ({ children }) => {
 
     useEffect(async () => {
         try {
-            const { content } = await qualityService.get();
+            const { content } = await qualityService.fetchAll();
             setQualities(content);
             setIsLoading(false);
         } catch (e) {

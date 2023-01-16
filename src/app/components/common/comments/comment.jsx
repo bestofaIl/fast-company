@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Avatar from "../avatar";
 import PropTypes from "prop-types";
 import displayDate from "../../../utils/displayDate";
-import { useUser } from "../../../hooks/useUsers";
 import { useAuth } from "../../../hooks/useAuth";
+import { useUser } from "../../../hooks/useUsers";
 
 const Comment = ({
     content,
