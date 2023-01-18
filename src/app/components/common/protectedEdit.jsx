@@ -1,16 +1,17 @@
 import React from "react";
-import { useAuth } from "../../hooks/useAuth";
 import { Redirect, useParams } from "react-router-dom";
 import PropTypes from "prop-types";
 import EditUserPage from "../page/editUserPage";
+import { useSelector } from "react-redux";
+import { getCurrentUserId } from "../../store/users";
 
 const ProtectedEdit = () => {
-    const { currentUser } = useAuth();
+    const currentUserId = useSelector(getCurrentUserId());
     const { userId } = useParams();
-    if (currentUser._id === userId) {
+    if (currentUserId === userId) {
         return <EditUserPage />;
     } else {
-        return <Redirect to={`/users/${currentUser._id}/edit`} />;
+        return <Redirect to={`/users/${currentUserId}/edit`} />;
     }
 };
 

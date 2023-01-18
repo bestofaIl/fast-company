@@ -21,8 +21,8 @@ export const useAuth = () => {
 };
 
 const AuthProvider = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState(null);
-    const [error, setError] = useState();
+    const [currentUser, setCurrentUser] = useState();
+    const [error, setError] = useState(null);
     const [isLoading, setLoading] = useState(true);
     const history = useHistory();
 
@@ -97,7 +97,6 @@ const AuthProvider = ({ children }) => {
                     throw errorObject;
                 }
             }
-            // throw new Error
         }
     }
 
@@ -129,7 +128,7 @@ const AuthProvider = ({ children }) => {
         }
     }
 
-    useEffect(async () => {
+    useEffect(() => {
         if (localStorageService.getAccessToken()) {
             getUserData();
         } else {

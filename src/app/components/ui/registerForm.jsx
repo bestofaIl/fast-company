@@ -5,14 +5,13 @@ import SelectField from "../common/form/selectField";
 import RadioField from "../common/form/radioField";
 import MultiSelectField from "../common/form/multiSelectField";
 import CheckBoxField from "../common/form/checkBoxField";
-import { useAuth } from "../../hooks/useAuth";
-import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getQualits } from "../../store/qualities";
 import { getProfs } from "../../store/professions";
+import { signUp } from "../../store/users";
 
 const RegisterForm = () => {
-    const history = useHistory();
+    const dispatch = useDispatch();
     const [data, setData] = useState({
         email: "",
         password: "",
@@ -22,7 +21,6 @@ const RegisterForm = () => {
         qualities: [],
         licence: false
     });
-    const { signUp } = useAuth();
     const qualities = useSelector(getQualits());
     const professions = useSelector(getProfs());
 
@@ -45,21 +43,6 @@ const RegisterForm = () => {
                 };
             }
         }
-    };
-    const getQualities = (elements) => {
-        const qualitiesArray = [];
-        for (const elem of elements) {
-            for (const quality of qualities) {
-                if (elem.value === quality.value) {
-                    qualitiesArray.push({
-                        _id: quality.value,
-                        name: quality.label,
-                        color: quality.color
-                    });
-                }
-            }
-        }
-        return qualitiesArray;
     };
 
     const handleChange = (target) => {
@@ -122,7 +105,7 @@ const RegisterForm = () => {
         return Object.keys(errors).length === 0;
     };
     const isValid = Object.keys(errors).length === 0;
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
@@ -130,12 +113,7 @@ const RegisterForm = () => {
             ...data,
             qualities: data.qualities.map((quality) => quality.value)
         };
-        try {
-            await signUp(newData);
-            history.push("/");
-        } catch (e) {
-            setErrors(e);
-        }
+        dispatch(signUp(newData));
     };
     return (
         <form onSubmit={handleSubmit}>

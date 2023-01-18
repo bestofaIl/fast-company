@@ -4,23 +4,24 @@ import PropTypes from "prop-types";
 import SelectField from "../common/form/selectField";
 import RadioField from "../common/form/radioField";
 import MultiSelectField from "../common/form/multiSelectField";
-import { useHistory, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import BackButton from "../common/backButton";
-import { useAuth } from "../../hooks/useAuth";
 import { validator } from "../../utils/validator";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getQualitiesLoadingStatus, getQualits } from "../../store/qualities";
 import { getProfessionsLoadingStatus, getProfs } from "../../store/professions";
+import { getCurrentUserData, updateUserDate } from "../../store/users";
 
 const EditUserPage = () => {
+    const dispatch = useDispatch();
+
     const [isLoading, setLoading] = useState(true);
     const [errors, setErrors] = useState({});
 
     const params = useParams();
     const { userId } = params;
-    const history = useHistory();
 
-    const { currentUser, updateUserData } = useAuth();
+    const currentUser = useSelector(getCurrentUserData());
 
     const professions = useSelector(getProfs());
     const professionsLoading = useSelector(getProfessionsLoadingStatus());
@@ -112,14 +113,14 @@ const EditUserPage = () => {
     };
     const isValid = Object.keys(errors).length === 0;
 
-    const handleSubmitChange = async (e) => {
+    const handleSubmitChange = (e) => {
         e.preventDefault();
+        if (!isValid) return;
         const preparedData = {
             ...data,
             qualities: getQualities(data.qualities)
         };
-        await updateUserData(userId, preparedData);
-        history.replace(`/users/${userId}`);
+        dispatch(updateUserDate(userId, preparedData));
     };
 
     return (

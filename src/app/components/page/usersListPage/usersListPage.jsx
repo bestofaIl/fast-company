@@ -6,17 +6,16 @@ import SearchStat from "../../ui/searchStat";
 import UsersTable from "../../ui/usersTable";
 import SearchLine from "../../common/searchLine";
 import _ from "lodash";
-import { useUser } from "../../../hooks/useUsers";
-import { useAuth } from "../../../hooks/useAuth";
 import { useSelector } from "react-redux";
 import {
     getProfessionsLoadingStatus,
     getProfs
 } from "../../../store/professions";
+import { getCurrentUserId, getUsers } from "../../../store/users";
 
 const UsersListPage = () => {
-    const { users } = useUser();
-    const { currentUser } = useAuth();
+    const users = useSelector(getUsers());
+    const currentUserId = useSelector(getCurrentUserId());
 
     const professions = useSelector(getProfs());
     const professionsLoading = useSelector(getProfessionsLoadingStatus());
@@ -72,7 +71,7 @@ const UsersListPage = () => {
                       JSON.stringify(selectedProf)
               )
             : searchUsers;
-        return filteredUsers.filter((user) => user._id !== currentUser._id);
+        return filteredUsers.filter((user) => user._id !== currentUserId);
     }
 
     const filteredUsers = filterUsers(users);
