@@ -1,38 +1,60 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AddCommentForm } from "../common/comments";
 import CommentsList from "../common/comments/commentsList";
-import { useComments } from "../../hooks/useComments";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    addComment,
+    deleteComment,
+    getComments,
+    getCommentsLoadingStatus,
+    loadCommentsList
+} from "../../store/comments";
+import { useParams } from "react-router-dom";
+import { getCurrentUserId } from "../../store/users";
+import { nanoid } from "nanoid";
 
 function sortByDate(arr) {
     if (!arr) return 0;
-    for (let i = 0; i < arr.length; i++) {
-        for (let k = 0; k < arr.length - i - 1; k++) {
-            if (Number(arr[k].created_at) < Number(arr[k + 1].created_at)) {
-                const temp = arr[k];
-                arr[k] = arr[k + 1];
-                arr[k + 1] = temp;
+    const copyOfArr = [...arr];
+    for (let i = 0; i < copyOfArr.length; i++) {
+        for (let k = 0; k < copyOfArr.length - i - 1; k++) {
+            if (
+                Number(copyOfArr[k].created_at) <
+                Number(copyOfArr[k + 1].created_at)
+            ) {
+                const temp = copyOfArr[k];
+                copyOfArr[k] = copyOfArr[k + 1];
+                copyOfArr[k + 1] = temp;
             }
         }
     }
-    return arr;
+    return copyOfArr;
 }
 
 const Comments = () => {
-    const { createComment, comments, deleteComment } = useComments();
+    const currentUserId = useSelector(getCurrentUserId());
+    const { userId } = useParams();
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(loadCommentsList(userId));
+    }, [userId]);
+    const isLoading = useSelector(getCommentsLoadingStatus());
+
+    const comments = useSelector(getComments());
 
     const handleRemoveComment = (id) => {
-        deleteComment(id);
+        dispatch(deleteComment(id));
     };
 
     const handleSubmit = (data) => {
-        createComment(data);
-        // api.comments.add({
-        //     ...data,
-        //     pageId: userId
-        // })
-        //     .then((data) => {
-        //         setComments([...comments, data]);
-        //     });
+        const comment = {
+            ...data,
+            pageId: userId,
+            created_at: Date.now(),
+            userId: currentUserId,
+            _id: nanoid()
+        };
+        dispatch(addComment(comment));
     };
 
     const sortedComments = sortByDate(comments);
@@ -49,11 +71,14 @@ const Comments = () => {
                     <div className="card-body ">
                         <h2>Comments</h2>
                         <hr />
-
-                        <CommentsList
-                            onRemove={handleRemoveComment}
-                            comments={sortedComments}
-                        />
+                        {!isLoading ? (
+                            <CommentsList
+                                onRemove={handleRemoveComment}
+                                comments={sortedComments}
+                            />
+                        ) : (
+                            "Loading..."
+                        )}
                     </div>
                 </div>
             )}
